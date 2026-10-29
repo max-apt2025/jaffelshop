@@ -32,6 +32,8 @@ const PRODUCTS = [
   ["Pour-over kettle", 5900, 12],
   ["Ceramic mug", 1500, 100],
   ["Paper filters, 100 pack", 600, 250],
+  ["French press, 1 L", 3200, 8],
+  ["Cold brew kit", 3800, 15],
 ];
 
 async function setUpDatabase() {
@@ -43,14 +45,14 @@ async function setUpDatabase() {
       stock       INTEGER NOT NULL
     )
   `);
-  const { rows } = await db.query("SELECT count(*)::int AS n FROM products");
-  if (rows[0].n === 0) {
-    for (const [name, price, stock] of PRODUCTS) {
-      await db.query(
-        "INSERT INTO products (name, price_cents, stock) VALUES ($1, $2, $3)",
-        [name, price, stock]
-      );
-    }
+  // Product names identify seed entries. Insert missing entries without
+  // resetting stock or price changes in an existing database.
+  await db.query("CREATE UNIQUE INDEX IF NOT EXISTS products_name_unique ON products (name)");
+  for (const [name, price, stock] of PRODUCTS) {
+    await db.query(
+      "INSERT INTO products (name, price_cents, stock) VALUES ($1, $2, $3) ON CONFLICT (name) DO NOTHING",
+      [name, price, stock]
+    );
   }
 }
 
@@ -74,6 +76,15 @@ app.use((req, res, next) => {
 
 app.get("/health", (req, res) => {
   res.json({ status: "ok", service: "catalog-api", instance: INSTANCE_ID });
+});
+
+app.get("/ready", async (req, res) => {
+  try {
+    await db.query("SELECT 1");
+    res.json({ status: "ready", service: "catalog-api" });
+  } catch {
+    res.status(503).json({ status: "not ready", service: "catalog-api" });
+  }
 });
 
 // Deliberately expensive: keeps the CPU busy for ?ms= milliseconds (max 2000),

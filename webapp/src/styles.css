@@ -27,6 +27,25 @@ header p,
   color: var(--muted);
 }
 
+nav {
+  display: flex;
+  gap: 18px;
+  margin-top: 24px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--border);
+}
+
+nav a {
+  color: var(--accent);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+nav a[aria-current="page"] {
+  text-decoration: underline;
+  text-underline-offset: 5px;
+}
+
 h1 {
   margin-bottom: 4px;
 }
@@ -81,6 +100,31 @@ table {
   border: 1px solid var(--border);
 }
 
+.order-totals {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.order-total {
+  display: grid;
+  gap: 6px;
+  padding: 14px 16px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+}
+
+.order-total span {
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+.order-total strong {
+  font-size: 1.4rem;
+}
+
 th,
 td {
   text-align: left;
@@ -103,6 +147,10 @@ td {
 @media (max-width: 560px) {
   .products li {
     grid-template-columns: 1fr auto;
+  }
+
+  .order-totals {
+    grid-template-columns: 1fr;
   }
 }
 

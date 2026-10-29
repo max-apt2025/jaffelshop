@@ -69,6 +69,16 @@ def health():
     return {"status": "ok", "service": "orders-api"}
 
 
+@app.get("/ready")
+def readiness():
+    try:
+        with psycopg.connect(DATABASE_URL) as conn:
+            conn.execute("SELECT 1")
+    except psycopg.Error:
+        raise HTTPException(status_code=503, detail="Database unavailable")
+    return {"status": "ready", "service": "orders-api"}
+
+
 @app.get("/orders")
 def list_orders():
     with psycopg.connect(DATABASE_URL) as conn:
