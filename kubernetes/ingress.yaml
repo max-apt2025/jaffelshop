@@ -1,0 +1,36 @@
+# Requires an NGINX Ingress Controller with ingressClassName: nginx.
+# API prefixes are stripped; the final path preserves web assets and SPA routes.
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: jaffelshop
+  namespace: jaffelshop
+  annotations:
+    nginx.ingress.kubernetes.io/use-regex: "true"
+    nginx.ingress.kubernetes.io/rewrite-target: /$2
+spec:
+  ingressClassName: nginx
+  rules:
+    - http:
+        paths:
+          - path: /api/catalog(/|$)(.*)
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: catalog-api
+                port:
+                  number: 8080
+          - path: /api(/|$)(.*)
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: orders-api
+                port:
+                  number: 8000
+          - path: /((.*))
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: webapp
+                port:
+                  number: 80
